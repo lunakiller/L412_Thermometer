@@ -78,6 +78,7 @@ static void MX_TIM16_Init(void);
 static uint32_t GetLSIFrequency(void);
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim);
 void HAL_RTCEx_WakeUpTimerEventCallback(RTC_HandleTypeDef *hrtc);
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -127,7 +128,7 @@ int main(void)
   }
 
   MX_TIM16_Init();
-  HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 0x0, RTC_WAKEUPCLOCK_CK_SPRE_16BITS, 0x0);
+  HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 59, RTC_WAKEUPCLOCK_CK_SPRE_16BITS, 0x0);
 
   HAL_UART_Transmit(&hlpuart1, (uint8_t*)"USB deinit..\r\n", 14, 1000);
   MX_USB_DEVICE_DeInit();
@@ -162,7 +163,10 @@ int main(void)
   }
 
   HAL_Delay(100);
+  // restart UART
+  MX_LPUART1_UART_Init();
   HAL_UART_Transmit(&hlpuart1, (uint8_t*)"Done!\r\n", 7, 1000);
+
 
   /* Get the LSI frequency:  TIM16 is used to measure the LSI frequency */
   uwLsiFreq = GetLSIFrequency();
@@ -227,10 +231,16 @@ int main(void)
     PCD8544_UpdateArea(0, 10, PCD8544_WIDTH - 1, 28);
     PCD8544_Refresh();
 
-    // HAL_UART_Transmit(&hlpuart1, (uint8_t*)"Sleep\r\n", 7, HAL_MAX_DELAY);
-    // HAL_SuspendTick();
-    // HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
-    HAL_Delay(1000);
+    if(HAL_GPIO_ReadPin(WKUP_GPIO_Port, WKUP_Pin) != GPIO_PIN_RESET) {
+      HAL_UART_Transmit(&hlpuart1, (uint8_t*)"Sleep\r\n", 7, HAL_MAX_DELAY);
+      HAL_SuspendTick();
+      HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+    }
+    else {
+      HAL_UART_Transmit(&hlpuart1, (uint8_t*)"DEBUG\r\n", 7, HAL_MAX_DELAY);
+      HAL_Delay(1000);
+    }
+    
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -248,10 +258,6 @@ void SystemClock_Config(void)
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
-  /** Configure LSE Drive Capability
-  */
-  HAL_PWR_EnableBkUpAccess();
-  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
   /** Configure the main internal regulator output voltage
   */
   if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK)
@@ -261,9 +267,7 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_LSE
-                              |RCC_OSCILLATORTYPE_MSI;
-  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_MSI;
   RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.MSIState = RCC_MSI_ON;
   RCC_OscInitStruct.MSICalibrationValue = 0;
@@ -296,9 +300,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  /** Enable MSI Auto calibration
-  */
-  HAL_RCCEx_EnableMSIPLLMode();
 }
 
 /**
@@ -499,7 +500,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
@@ -511,6 +511,12 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LCD_LIGHT_GPIO_Port, LCD_LIGHT_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin : WKUP_Pin */
+  GPIO_InitStruct.Pin = WKUP_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(WKUP_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LCD_CE_Pin LCD_DC_Pin */
   GPIO_InitStruct.Pin = LCD_CE_Pin|LCD_DC_Pin;
@@ -533,11 +539,20 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LCD_LIGHT_GPIO_Port, &GPIO_InitStruct);
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+  HAL_ResumeTick();
+}
+
 void HAL_RTCEx_WakeUpTimerEventCallback(RTC_HandleTypeDef *hrtc)
 {    
+  HAL_ResumeTick();
   HAL_UART_Transmit(&hlpuart1, (uint8_t*)"WKUP\r\n", 6, 500);
 }
 /**

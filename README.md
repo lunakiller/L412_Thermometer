@@ -8,7 +8,9 @@ Temperature and humidity station powered by STM32L412KB MCU. The goal of the pro
 - 600mAh Li-Ion battery
 
 ## Goals
+- [x] Build it on the breadboard
 - [x] Show temperature and humidity data on the display
+- [x] Run from the battery
 - [ ] Design PCB [work-in-progress]
 - [ ] Measure battery voltage
 - [ ] Sync time through USB
