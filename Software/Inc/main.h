@@ -61,6 +61,8 @@ void Error_Handler(void);
 #define WKUP_Pin GPIO_PIN_0
 #define WKUP_GPIO_Port GPIOA
 #define WKUP_EXTI_IRQn EXTI0_IRQn
+#define V_BAT_Pin GPIO_PIN_1
+#define V_BAT_GPIO_Port GPIOA
 #define LCD_CE_Pin GPIO_PIN_4
 #define LCD_CE_GPIO_Port GPIOA
 #define LCD_CLK_Pin GPIO_PIN_5
@@ -77,6 +79,10 @@ void Error_Handler(void);
 #define SI7021_CSL_GPIO_Port GPIOA
 #define SI7021_SDA_Pin GPIO_PIN_10
 #define SI7021_SDA_GPIO_Port GPIOA
+#define BAT_MEAS_EN_Pin GPIO_PIN_6
+#define BAT_MEAS_EN_GPIO_Port GPIOB
+#define SCREEN_Pin GPIO_PIN_7
+#define SCREEN_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
@@ -86,5 +92,3 @@ void Error_Handler(void);
 #endif
 
 #endif /* __MAIN_H */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
