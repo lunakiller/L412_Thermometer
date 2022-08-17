@@ -75,14 +75,14 @@ void Error_Handler(void);
 #define LCD_RST_GPIO_Port GPIOB
 #define LCD_LIGHT_Pin GPIO_PIN_1
 #define LCD_LIGHT_GPIO_Port GPIOB
+#define SCREEN_Pin GPIO_PIN_8
+#define SCREEN_GPIO_Port GPIOA
 #define SI7021_CSL_Pin GPIO_PIN_9
 #define SI7021_CSL_GPIO_Port GPIOA
 #define SI7021_SDA_Pin GPIO_PIN_10
 #define SI7021_SDA_GPIO_Port GPIOA
 #define BAT_MEAS_EN_Pin GPIO_PIN_6
 #define BAT_MEAS_EN_GPIO_Port GPIOB
-#define SCREEN_Pin GPIO_PIN_7
-#define SCREEN_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

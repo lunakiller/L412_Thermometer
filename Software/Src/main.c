@@ -584,11 +584,11 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LCD_LIGHT_GPIO_Port, LCD_LIGHT_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pin : WKUP_Pin */
-  GPIO_InitStruct.Pin = WKUP_Pin;
+  /*Configure GPIO pins : WKUP_Pin SCREEN_Pin */
+  GPIO_InitStruct.Pin = WKUP_Pin|SCREEN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(WKUP_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LCD_CE_Pin LCD_DC_Pin */
   GPIO_InitStruct.Pin = LCD_CE_Pin|LCD_DC_Pin;
@@ -610,12 +610,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LCD_LIGHT_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : SCREEN_Pin */
-  GPIO_InitStruct.Pin = SCREEN_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(SCREEN_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
