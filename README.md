@@ -11,7 +11,7 @@ Temperature and humidity station powered by STM32L412KB MCU. The goal of the pro
 - [x] Build it on the breadboard
 - [x] Show temperature and humidity data on the display
 - [x] Run from the battery
-- [ ] Design PCB [work-in-progress]
+- [x] Design PCB
 - [ ] Measure battery voltage
 - [ ] Sync time through USB
 - [ ] Design 3D printed case
